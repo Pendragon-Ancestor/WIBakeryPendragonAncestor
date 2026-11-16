@@ -9,7 +9,12 @@ import '../../../features/products/providers/product_provider.dart';
 import '../../../features/cart/providers/cart_provider.dart';
 import '../../../features/orders/providers/order_provider.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/app_drawer.dart';
 
+/// Kerangka utama aplikasi pelanggan.
+/// Menggabungkan dua pola navigasi tingkat aplikasi:
+///   1. Drawer  -> menu tersembunyi (termasuk "Tentang Aplikasi")
+///   2. BottomNavigationBar -> 4 menu utama dengan ikon + label teks
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
@@ -20,12 +25,9 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = const [
-    HomeScreen(),
-    MenuScreen(),
-    CartScreen(),
-    OrderStatusScreen(),
-  ];
+  /// Key dipakai agar tombol menu pada tiap tab dapat membuka Drawer
+  /// milik Scaffold di level MainScreen (bukan Scaffold milik tab).
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -45,13 +47,40 @@ class _MainScreenState extends State<MainScreen> {
     ]);
   }
 
+  void _openDrawer() => _scaffoldKey.currentState?.openDrawer();
+
+  void _selectTab(int index) {
+    if (index == _currentIndex) return;
+    setState(() => _currentIndex = index);
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Halaman tiap tab dibuat ulang setiap build agar callback
+    // pembuka drawer selalu mengarah ke Scaffold induk yang benar.
+    final screens = <Widget>[
+      HomeScreen(onOpenDrawer: _openDrawer),
+      MenuScreen(onOpenDrawer: _openDrawer),
+      CartScreen(onOpenDrawer: _openDrawer),
+      OrderStatusScreen(onOpenDrawer: _openDrawer),
+    ];
+
     return Scaffold(
+      key: _scaffoldKey,
+      // ---------------------------------------------------------------
+      // POLA 1: Drawer sebagai menu navigasi tambahan
+      // ---------------------------------------------------------------
+      drawer: AppDrawer(
+        currentIndex: _currentIndex,
+        onSelectTab: _selectTab,
+      ),
       body: IndexedStack(
         index: _currentIndex,
-        children: _screens,
+        children: screens,
       ),
+      // ---------------------------------------------------------------
+      // POLA 2: BottomNavigationBar sebagai menu utama (ikon + label)
+      // ---------------------------------------------------------------
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           boxShadow: [
@@ -64,7 +93,7 @@ class _MainScreenState extends State<MainScreen> {
         ),
         child: BottomNavigationBar(
           currentIndex: _currentIndex,
-          onTap: (index) => setState(() => _currentIndex = index),
+          onTap: _selectTab,
           items: [
             const BottomNavigationBarItem(
               icon: Icon(Icons.home_outlined),

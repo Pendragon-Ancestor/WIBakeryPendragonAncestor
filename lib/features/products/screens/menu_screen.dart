@@ -5,7 +5,10 @@ import '../providers/product_provider.dart';
 import '../widgets/product_card.dart';
 
 class MenuScreen extends StatelessWidget {
-  const MenuScreen({super.key});
+  /// Callback untuk membuka Drawer milik MainScreen.
+  final VoidCallback? onOpenDrawer;
+
+  const MenuScreen({super.key, this.onOpenDrawer});
 
   @override
   Widget build(BuildContext context) {
@@ -29,8 +32,16 @@ class MenuScreen extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          // Tombol pembuka Drawer
+          if (onOpenDrawer != null) ...[
+            IconButton(
+              onPressed: onOpenDrawer,
+              tooltip: 'Buka menu',
+              icon: const Icon(Icons.menu, color: AppColors.textPrimary),
+            ),
+            const SizedBox(width: 4),
+          ],
           const Text(
             'Menu Bakery',
             style: TextStyle(
@@ -40,6 +51,7 @@ class MenuScreen extends StatelessWidget {
               color: AppColors.textPrimary,
             ),
           ),
+          const Spacer(),
           Container(
             width: 40,
             height: 40,
@@ -48,7 +60,8 @@ class MenuScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: AppColors.border),
             ),
-            child: const Icon(Icons.tune, color: AppColors.textSecondary, size: 20),
+            child: const Icon(Icons.tune,
+                color: AppColors.textSecondary, size: 20),
           ),
         ],
       ),
@@ -97,8 +110,9 @@ class MenuScreen extends StatelessWidget {
             itemCount: categories.length + 1, // +1 for "Semua"
             itemBuilder: (_, i) {
               final isAll = i == 0;
-              final isSelected =
-                  isAll ? selectedId == null : selectedId == categories[i - 1].categoryId;
+              final isSelected = isAll
+                  ? selectedId == null
+                  : selectedId == categories[i - 1].categoryId;
               final label = isAll ? 'Semua' : categories[i - 1].categoryName;
 
               return GestureDetector(
@@ -106,14 +120,15 @@ class MenuScreen extends StatelessWidget {
                   if (isAll) {
                     provider.filterByCategory(null, 'Semua');
                   } else {
-                    provider.filterByCategory(
-                        categories[i - 1].categoryId!, categories[i - 1].categoryName);
+                    provider.filterByCategory(categories[i - 1].categoryId!,
+                        categories[i - 1].categoryName);
                   }
                 },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   margin: const EdgeInsets.symmetric(horizontal: 4),
-                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
                   decoration: BoxDecoration(
                     color: isSelected ? AppColors.primary : Colors.white,
                     borderRadius: BorderRadius.circular(20),
@@ -126,8 +141,10 @@ class MenuScreen extends StatelessWidget {
                     style: TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 13,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                      color: isSelected ? Colors.white : AppColors.textSecondary,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.w400,
+                      color:
+                          isSelected ? Colors.white : AppColors.textSecondary,
                     ),
                   ),
                 ),

@@ -6,14 +6,23 @@ import '../../../core/widgets/bakery_image.dart';
 import '../../../app/router.dart';
 
 class CartScreen extends StatelessWidget {
-  const CartScreen({super.key});
+  /// Callback untuk membuka Drawer milik MainScreen.
+  final VoidCallback? onOpenDrawer;
+
+  const CartScreen({super.key, this.onOpenDrawer});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        leading: const BackButton(),
+        leading: onOpenDrawer == null
+            ? const BackButton()
+            : IconButton(
+                onPressed: onOpenDrawer,
+                tooltip: 'Buka menu',
+                icon: const Icon(Icons.menu, color: AppColors.textPrimary),
+              ),
         title: const Text('Keranjang Belanja'),
         backgroundColor: Colors.white,
         elevation: 0,
@@ -78,10 +87,12 @@ class CartScreen extends StatelessWidget {
                           item: item,
                           onIncrease: () => context
                               .read<CartProvider>()
-                              .updateQuantity(item.cartDetailId!, item.quantity + 1),
+                              .updateQuantity(
+                                  item.cartDetailId!, item.quantity + 1),
                           onDecrease: () => context
                               .read<CartProvider>()
-                              .updateQuantity(item.cartDetailId!, item.quantity - 1),
+                              .updateQuantity(
+                                  item.cartDetailId!, item.quantity - 1),
                           onDelete: () => context
                               .read<CartProvider>()
                               .removeItem(item.cartDetailId!),
@@ -139,7 +150,8 @@ class CartScreen extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(Icons.location_on, color: AppColors.primary, size: 20),
+                const Icon(Icons.location_on,
+                    color: AppColors.primary, size: 20),
                 const SizedBox(width: 12),
                 const Expanded(
                   child: Column(
@@ -243,8 +255,8 @@ class CartScreen extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label,
-            style: const TextStyle(
-                color: AppColors.textSecondary, fontSize: 14)),
+            style:
+                const TextStyle(color: AppColors.textSecondary, fontSize: 14)),
         Text(value,
             style: const TextStyle(
                 color: AppColors.textPrimary,
@@ -272,8 +284,7 @@ class CartScreen extends StatelessWidget {
           width: double.infinity,
           height: 52,
           child: ElevatedButton(
-            onPressed: () =>
-                Navigator.pushNamed(context, AppRouter.checkout),
+            onPressed: () => Navigator.pushNamed(context, AppRouter.checkout),
             child: const Text(
               'Pesan Sekarang',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),

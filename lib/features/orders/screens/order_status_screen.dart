@@ -7,7 +7,10 @@ import '../../../core/models/order_model.dart';
 import '../../../app/router.dart';
 
 class OrderStatusScreen extends StatelessWidget {
-  const OrderStatusScreen({super.key});
+  /// Callback untuk membuka Drawer milik MainScreen.
+  final VoidCallback? onOpenDrawer;
+
+  const OrderStatusScreen({super.key, this.onOpenDrawer});
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +24,15 @@ class OrderStatusScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
               child: Row(
                 children: [
+                  if (onOpenDrawer != null) ...[
+                    IconButton(
+                      onPressed: onOpenDrawer,
+                      tooltip: 'Buka menu',
+                      icon:
+                          const Icon(Icons.menu, color: AppColors.textPrimary),
+                    ),
+                    const SizedBox(width: 4),
+                  ],
                   const Text(
                     'Status Pesanan',
                     style: TextStyle(
@@ -50,7 +62,8 @@ class OrderStatusScreen extends StatelessWidget {
                 builder: (_, provider, __) {
                   if (provider.isLoading) {
                     return const Center(
-                      child: CircularProgressIndicator(color: AppColors.primary),
+                      child:
+                          CircularProgressIndicator(color: AppColors.primary),
                     );
                   }
 
@@ -154,8 +167,18 @@ class _OrderCard extends StatelessWidget {
     try {
       final dt = DateTime.parse(dateStr);
       final months = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-        'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'Mei',
+        'Jun',
+        'Jul',
+        'Agu',
+        'Sep',
+        'Okt',
+        'Nov',
+        'Des'
       ];
       return '${dt.day} ${months[dt.month - 1]} ${dt.year} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
     } catch (_) {
@@ -230,8 +253,8 @@ class _OrderCard extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 5),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
                       color: statusColor,
                       borderRadius: BorderRadius.circular(20),

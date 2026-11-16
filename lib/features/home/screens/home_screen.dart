@@ -7,7 +7,10 @@ import '../../products/widgets/product_card.dart';
 import '../../../app/router.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  /// Callback untuk membuka Drawer milik MainScreen.
+  final VoidCallback? onOpenDrawer;
+
+  const HomeScreen({super.key, this.onOpenDrawer});
 
   @override
   Widget build(BuildContext context) {
@@ -42,30 +45,41 @@ class HomeScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 60, 20, 16),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Welcome, ${user?.name.split(' ').first ?? 'Pelanggan'} 👋',
-                style: const TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+          // Tombol pembuka Drawer (ikon + tooltip)
+          if (onOpenDrawer != null) ...[
+            IconButton(
+              onPressed: onOpenDrawer,
+              tooltip: 'Buka menu',
+              icon: const Icon(Icons.menu, color: AppColors.textPrimary),
+            ),
+            const SizedBox(width: 4),
+          ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Welcome, ${user?.name.split(' ').first ?? 'Pelanggan'} 👋',
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
-              ),
-              const Text(
-                'Pesan roti favoritmu sekarang!',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 13,
-                  color: AppColors.textSecondary,
+                const Text(
+                  'Pesan roti favoritmu sekarang!',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 13,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
+          const SizedBox(width: 8),
           GestureDetector(
             onTap: () => _showProfileSheet(context),
             child: Container(
@@ -116,8 +130,7 @@ class HomeScreen extends StatelessWidget {
                   focusedBorder: InputBorder.none,
                   isDense: true,
                   contentPadding: EdgeInsets.symmetric(vertical: 12),
-                  hintStyle:
-                      TextStyle(color: AppColors.textHint, fontSize: 14),
+                  hintStyle: TextStyle(color: AppColors.textHint, fontSize: 14),
                 ),
               ),
             ),
@@ -261,8 +274,9 @@ class HomeScreen extends StatelessWidget {
                         .read<ProductProvider>()
                         .filterByCategory(null, 'Semua');
                   } else {
-                    context.read<ProductProvider>().filterByCategory(
-                        cat.categoryId!, cat.categoryName);
+                    context
+                        .read<ProductProvider>()
+                        .filterByCategory(cat.categoryId!, cat.categoryName);
                   }
                 },
                 child: AnimatedContainer(
@@ -307,9 +321,8 @@ class HomeScreen extends StatelessWidget {
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 11,
-                          fontWeight: isSelected
-                              ? FontWeight.w600
-                              : FontWeight.w400,
+                          fontWeight:
+                              isSelected ? FontWeight.w600 : FontWeight.w400,
                           color: isSelected
                               ? AppColors.primary
                               : AppColors.textSecondary,
@@ -371,9 +384,10 @@ class HomeScreen extends StatelessWidget {
           );
         }
 
-        final products = provider.filteredProducts.isEmpty && provider.searchQuery.isEmpty
-            ? provider.popularProducts
-            : provider.filteredProducts;
+        final products =
+            provider.filteredProducts.isEmpty && provider.searchQuery.isEmpty
+                ? provider.popularProducts
+                : provider.filteredProducts;
 
         if (products.isEmpty) {
           return const SliverToBoxAdapter(
@@ -474,8 +488,8 @@ class _ProfileSheet extends StatelessWidget {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.logout, color: AppColors.error),
-            title: const Text('Keluar',
-                style: TextStyle(color: AppColors.error)),
+            title:
+                const Text('Keluar', style: TextStyle(color: AppColors.error)),
             onTap: () async {
               Navigator.pop(context);
               await context.read<AuthProvider>().logout();

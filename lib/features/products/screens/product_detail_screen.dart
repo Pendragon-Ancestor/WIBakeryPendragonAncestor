@@ -5,14 +5,39 @@ import '../../../core/models/product_model.dart';
 import '../../../core/widgets/bakery_image.dart';
 import '../../cart/providers/cart_provider.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../../app/router.dart';
 
 class ProductDetailScreen extends StatelessWidget {
-  final ProductModel product;
+  /// Opsional. Bila null, data produk dibaca dari argument route
+  /// (`Navigator.pushNamed(..., arguments: product)`).
+  final ProductModel? product;
 
-  const ProductDetailScreen({super.key, required this.product});
+  const ProductDetailScreen({super.key, this.product});
+
+  /// Mengambil argument route dan MEMERIKSA tipenya sebelum dipakai.
+  /// Jika argument kosong / bukan ProductModel, halaman menampilkan
+  /// pesan kesalahan yang ramah, bukan crash.
+  ProductModel? _resolveProduct(BuildContext context) {
+    if (product != null) return product;
+
+    final arguments = ModalRoute.of(context)?.settings.arguments;
+    if (arguments is ProductModel) {
+      return arguments;
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final resolved = _resolveProduct(context);
+
+    if (resolved == null) {
+      return const _ProductArgumentErrorScreen();
+    }
+    return _buildDetail(context, resolved);
+  }
+
+  Widget _buildDetail(BuildContext context, ProductModel product) {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: CustomScrollView(
@@ -22,6 +47,9 @@ class ProductDetailScreen extends StatelessWidget {
             expandedHeight: 300,
             pinned: true,
             backgroundColor: AppColors.background,
+            // Judul halaman selalu terlihat saat AppBar menyusut,
+            // sehingga pengguna tahu sedang berada di halaman detail.
+            title: const Text('Detail Produk'),
             leading: GestureDetector(
               onTap: () => Navigator.pop(context),
               child: Container(
@@ -169,7 +197,7 @@ class ProductDetailScreen extends StatelessWidget {
             width: double.infinity,
             height: 52,
             child: ElevatedButton.icon(
-              onPressed: () => _showAddToCart(context),
+              onPressed: () => _showAddToCart(context, product),
               icon: const Icon(Icons.shopping_cart_outlined),
               label: const Text('Tambah ke Keranjang'),
             ),
@@ -205,7 +233,7 @@ class ProductDetailScreen extends StatelessWidget {
     );
   }
 
-  void _showAddToCart(BuildContext context) {
+  void _showAddToCart(BuildContext context, ProductModel product) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
@@ -300,8 +328,9 @@ class _AddToCartSheetState extends State<_AddToCartSheet> {
               child: Row(
                 children: [
                   IconButton(
-                    onPressed:
-                        _quantity > 1 ? () => setState(() => _quantity--) : null,
+                    onPressed: _quantity > 1
+                        ? () => setState(() => _quantity--)
+                        : null,
                     icon: const Icon(Icons.remove),
                     color: AppColors.primary,
                   ),
@@ -380,7 +409,8 @@ class _AddToCartSheetState extends State<_AddToCartSheet> {
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${widget.product.productName} ditambahkan ke keranjang'),
+          content:
+              Text('${widget.product.productName} ditambahkan ke keranjang'),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
           shape:
@@ -388,5 +418,66 @@ class _AddToCartSheetState extends State<_AddToCartSheet> {
         ),
       );
     }
+  }
+}
+
+/// Ditampilkan ketika halaman detail dibuka tanpa argument yang valid.
+/// Mencegah NullPointerException / TypeError akibat cast paksa.
+class _ProductArgumentErrorScreen extends StatelessWidget {
+  const _ProductArgumentErrorScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        leading: const BackButton(),
+        title: const Text('Detail Produk'),
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.inventory_2_outlined,
+                  size: 64, color: AppColors.warning),
+              const SizedBox(height: 16),
+              const Text(
+                'Data produk tidak tersedia',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Halaman ini membutuhkan argument berupa objek ProductModel '
+                'yang dikirim melalui Navigator.pushNamed(..., arguments: ...).',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 13,
+                  height: 1.5,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () => Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  AppRouter.home,
+                  (route) => false,
+                ),
+                icon: const Icon(Icons.home_outlined),
+                label: const Text('Kembali ke Beranda'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

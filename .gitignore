@@ -65,5 +65,8 @@ app.*.map.json
 # Web
 lib/generated_plugin_registrant.dart
 
+# Android build output (Gradle intermediates)
+android/build/
+
 # Exceptions to above rules.
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages

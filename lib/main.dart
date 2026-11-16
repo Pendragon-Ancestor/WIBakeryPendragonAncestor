@@ -52,7 +52,15 @@ class WIBBakeryApp extends StatelessWidget {
         title: 'WIB Bakery',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
+
+        // ---------------------------------------------------------------
+        // KONFIGURASI NAVIGASI (Pertemuan 8)
+        // initialRoute : halaman pertama yang dibuka saat aplikasi jalan
+        // routes       : peta nama route -> WidgetBuilder halaman statis
+        // onGenerateRoute : route yang butuh argument dinamis / validasi
+        // ---------------------------------------------------------------
         initialRoute: AppRouter.splash,
+        routes: AppRouter.routes,
         onGenerateRoute: AppRouter.generateRoute,
       ),
     );
